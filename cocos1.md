@@ -1,8 +1,16 @@
-## Welcome to GitHub Pages2222
+## CocosCreator屏幕适配
 
-You can use the [editor on GitHub](https://github.com/xiaoman122/CocosNote/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+Creator的Canvas组件有FitHeight，FitWidth
+![Image text](../images/screenfix/pic1.png)
+```markdown
+假设设计分辨率未1280 / 720 = 1.7777
+1. 勾选FitHeihgt,FitWidth = cc.ContentStrategy.SHOW_ALL
+2. 仅勾选FitHeight：宽度固定，拉伸高度
+3. 仅勾选FitWidth: 高度固定，拉伸宽度
+```
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+
+### 测试1
 
 ### Markdown
 
