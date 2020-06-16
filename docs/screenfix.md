@@ -1,6 +1,7 @@
 ## CocosCreator屏幕适配
 
 Creator的Canvas组件有FitHeight，FitWidth
+
 ![Image text](../images/screenfix/pic1.png)
 
 假设设计分辨率为1280 / 720 = 1.7777
