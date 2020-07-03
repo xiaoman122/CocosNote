@@ -1,5 +1,4 @@
 ## CocosCreator学习笔记
-```markdown
-[Cocos屏幕适配](./docs/screenfix.md)
-[图片与纹理的（内存、显存）占用](./docs/memory.md)
-```
+1. [Cocos屏幕适配](./docs/screenfix.md)
+2. [图片与纹理的（内存、显存）占用](./docs/memory.md)
+
