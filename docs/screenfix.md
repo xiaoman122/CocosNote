@@ -52,7 +52,7 @@ let canvas = this.node.getComponent(cc.Canvas);
 let deviceW = cc.winSize.width;
 let deviceH = cc.winSize.height;
 let designW = cc.view.getDesignResolutionSize().width;
-let designh = cc.view.getDesignResolutionSize().width;
+let designh = cc.view.getDesignResolutionSize().height;
 
 let ratio1 = deviceW / deviceH;
 let ratio2 = designW / designh;
