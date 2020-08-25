@@ -1,6 +1,6 @@
 ## CocosCreator的pipeline测试
 
-Creator的cc.assetManager的加载逻辑使用了pineline管线技术
+Creator的cc.assetManager的加载逻辑使用了pineline管线技术  
 pipeline封装了流程处理，对于上层业务开发也有很大帮助，因此本篇文档主要是为了记录pipeline使用方法
 
 ### pipeline实现原理
@@ -137,3 +137,5 @@ export default class TestPipeline
     }
 }
 ```
+
+`printf()`函数
