@@ -4,11 +4,12 @@ Creator的cc.assetManager的加载逻辑使用了pineline管线技术
 pipeline封装了流程处理，对于上层业务开发也有很大帮助，因此本篇文档主要是为了记录pipeline使用方法
 
 ### pipeline实现原理
-1. pipeline只能执行cc.AssetManager.Task
-2. 每个pipleline有pipes字段，这个字段记录的是**function**回调列表，pipeline做的就是依次执行这个回调列表
-3. pipeline类主要有两个方法**async**和**sync**，前者是同步函数，后者是异步函数（其实最终是否异步关键在于**回调**是否异步）
-4. **pipes**列表里的每个pipe函数里，必须要赋值task.output（除非这是最后一个pipe函数或者在pipe函数里不使用task.input）
-5. 关键代码如下
+* pipeline只能执行cc.AssetManager.Task
+* 每个pipleline有pipes字段，这个字段记录的是**function**回调列表，pipeline做的就是依次执行这个回调列表
+* pipeline类主要有两个方法**async**和**sync**，前者是同步函数，后者是异步函数（其实最终是否异步关键在于**回调**是否异步）
+* **pipes**列表里的每个pipe函数里，必须要赋值task.output（除非这是最后一个pipe函数或者在pipe函数里不使用task.input）
+* 如果在**pipe**函数里调用**done**时传递了参数，那么pipeline不会进行下一个pipe，将立即结束并回调complete
+* 关键代码如下
 ``` typescript
 if (result) {
     task._isFinish = true;
@@ -137,5 +138,3 @@ export default class TestPipeline
     }
 }
 ```
-
-`printf()`函数
