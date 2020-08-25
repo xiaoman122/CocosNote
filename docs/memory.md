@@ -1,22 +1,22 @@
 ## 图片与纹理的（内存、显存）占用
-    Zwoptex生成的spritesheet除了可以导出png格式的图片外还有pvr格式。pvr格式是iOS的显示芯片可以直接读取的，不需要经过解析就能直接显示，所以渲染速度更快，更节省内存。
+本篇文档主要记录**图片（jpg，png）**和**纹理(解压成显卡格式后的资源)**的内存显存占用  
+> Zwoptex是个图集生成工具，它生成的spritesheet除了可以导出png格式的图片外还有pvr格式。  
+> pvr格式是iOS的显示芯片可以直接读取的，不需要经过解析就能直接显示，所以渲染速度更快，更节省内存。  
+> 在cocos2D 2.0 rc1版本测试结果如下：  
+1. 一个空的cocos2D模版工程运行起来之后占用的内存大约是4MB。
+2. 直接用CCSprite显示一张2048*1024的数据格式为RGBA565的PNG图片之后，内存占用达到了20MB。
+3. 同样的情况下换成pvr格式之后，内存占用为16MB。也就是说png格式的图片占用了20-4=16MB，pvr格式的图片占用了16-4=12MB。节省了**25%**。
 
-我特意在cocos2D 2.0 rc1版本做了一项测试：
-     一个空的cocos2D模版工程运行起来之后占用的内存大约是4MB。
-    直接用CCSprite显示一张2048*1024的数据格式为RGBA565的PNG图片之后，内存占用达到了20MB。
-    同样的情况下换成pvr格式之后，内存占用为16MB。也就是说png格式的图片占用了20-4=16MB，pvr格式的图片占用了16-4=12MB。节省了25%。
+> Zwoptex还有一个选项叫做“ccz压缩”,选中之后图像的大小几乎可以减小一半。这样的文件格式为：xxx.pvr.ccz，cocos2d是可以识别的。
 
-    Zwoptex还有一个选项叫做“ccz压缩”,选中之后图像的大小几乎可以减小一半。这样的文件格式成了：xxx.pvr.ccz，cocos2d是可以识别的。
-
- PVRTC2和PVRTC4是两种pvr压缩的图像格式，他们都是pvr文件。这两种图像格式比普通图像有更快的加载速度和更小的内存占用。
-    PVRTC4: Compressed format, 4 bits per pixel, ok image quality
-    PVRTC2: Compressed format, 2 bits per pixel, poor image quality
-    一般pvr格式文件的图像格式有：
-    RGBA8888: 32-bit texture with alpha channel, best image quality
-    RGBA4444: 16-bit texture with alpha channel, good image quality
-    RGB565: 16-bit texture without alpha channel, good image quality but no alpha (transparency)
-    图像占用内存的公式是：numBytes = width * height * bitsPerPixel / 8
-    也就是说2048*2048的RGBA8888占用内存16MB，而PVRTC4只占用2MB
+ > PVRTC2和PVRTC4是两种pvr压缩的图像格式，他们都是pvr文件。这两种图像格式比普通图像有更快的加载速度和更小的内存占用。
+* PVRTC4: Compressed format, 4 bits per pixel, ok image quality
+* PVRTC2: Compressed format, 2 bits per pixel, poor image quality
+> 一般pvr格式文件的图像格式有：
+* RGBA8888: 32-bit texture with alpha channel, best image quality
+* RGBA4444: 16-bit texture with alpha channel, good image quality
+* RGB565: 16-bit texture without alpha channel, good image quality but no alpha (transparency)
+> 图像占用内存的公式是：**numBytes = width * height * bitsPerPixel / 8  **  ，也就是说2048*2048的RGBA8888占用内存16MB，而PVRTC4只占用2MB
 
 1. 2d游戏最占内存的无疑是图片资源。
 
@@ -30,19 +30,25 @@
 
 6. pvr.ccz其实就是pvr图片zip打包下，程序读的时候还是先解压出pvr资源，然后再读取pvr。不过由于压缩下可以极大的减小图片体积，所以虽然多了解压过程也不会有特别多的cpu消耗。
 
-7. 一张jpg图片实际加载过程内存消耗，以一张1024*1024 argb8888 500k的jpg图片为例： a.读取图片文件(消耗图片大小内存，500k)     b、解析jpg数据（cgimage, 4mb） c、释放500k的图片内存    d、opengl纹理数据(4mb)    e、释放cgimage的4mb内存。      注意，这个过程不是必然的顺序执行，释放cgimage内存的实际是有系统决定的，会很快，但是不一定是立即执行。  所以内存会瞬间飙升9mb左右，然后减少5mb，稳定到4mb左右
+7. 一张jpg图片实际加载过程内存消耗，以一张1024*1024 argb8888 500k的jpg图片为例： 
+* a.读取图片文件(消耗图片大小内存，500k)  
+* b、解析jpg数据（cgimage, 4mb）  
+* c、释放500k的图片内存    
+* d、opengl纹理数据(4mb)    
+* e、释放cgimage的4mb内存。  
+>> 注意，这个过程不是必然的顺序执行，释放cgimage内存的实际是有系统决定的，会很快，但是不一定是立即执行。  所以内存会瞬间飙升9mb左右，然后减少5mb，稳定到4mb左右
 
-png图片的加载过程与此相同
+>> png图片的加载过程与此相同
 
-       pvr图片可以节约解析图片数据到纹理这一步的消耗。也就是说读取pvr图片资源（等价于解压pvr.ccz到内存，如果是1024*1024 argb8888格式的话，那么图片大小就是4mb，ccz压缩后图片1mb左右）消耗4mb，将pvr图片数据提交给显卡消耗4mb。然后释放文件数据4mb。这么看似乎跟Png从内存占用上相比也不是非常有优势。（注意这里说的pvr是指pvr封装的argb8888，与pvrtc4的性能有天壤之别）
+>> pvr图片可以节约解析图片数据到纹理这一步的消耗。也就是说读取pvr图片资源（等价于解压pvr.ccz到内存，如果是1024*1024 argb8888格式的话，那么图片大小就是4mb，ccz压缩后图片1mb左右）消耗4mb，将pvr图片数据提交给显卡消耗4mb。然后释放文件数据4mb。这么看似乎跟Png从内存占用上相比也不是非常有优势。（注意这里说的pvr是指pvr封装的argb8888，与pvrtc4的性能有天壤之别）
 
 8. 由于最终消耗内存的都是纹理数据，所以只要纹理数据格式是一定的，无论图片是什么格式消耗的内存都是一样的。比如使用Png8图片，体积会减少70%，但是内存占用与png24/png32是等价的(读取的时候会内部把调色板还原成真彩色，也就是说，虽然png8是一个像素只占8位，但是读取到内存中的时候会将调色板颜色还原，依然需要开辟1024*1024*4字节的空间存放纹理数据)。 当然有无透明色，cocos2d的处理还是有区别的。如果是无透明色，可以使用png24，那么所需开辟的纹理空间就是3mb。
 
-       这里还有一点需要说明，一般我们处理windows下的dds纹理的时候，都习惯将其按2的整次幂对其，虽然图片内容只有900*900，但是图片大小却是1024*1024。那我们读取这个图片所消耗的内存就是4mb，按2的整次幂对其是有助于提高运行效率的，但是不是非常必须的。ios和android的设备都支持非2的整次幂的纹理。所以如果是png图片，那么它该多大就多大。此时消耗的内存就只有900*900*4=3mb。
+>> 这里还有一点需要说明，一般我们处理windows下的dds纹理的时候，都习惯将其按2的整次幂对其，虽然图片内容只有900*900，但是图片大小却是1024*1024。那我们读取这个图片所消耗的内存就是4mb，按2的整次幂对其是有助于提高运行效率的，但是不是非常必须的。ios和android的设备都支持非2的整次幂的纹理。所以如果是png图片，那么它该多大就多大。此时消耗的内存就只有900*900*4=3mb。
 
 9. 不要过于迷信所谓的去除alpha通道以节约内存。这个还要实际分析下具体结果。  我测试过（分别用cocos2d-x和鬼火3d引擎），rgba8888和rgb888格式的png图片显示所消耗的内存是一样的。24位图片虽然读取的时候开辟的内存只有3mb（1024*1024*3，注意如果是用CGImage读取的话，那这个值就是4mb），但是glTexImage2D提交给显卡后依然会增加4mb内存。可能跟显卡的数据对齐有关。
 
-     这里我测试还有一个诡异的地方，如果是用pvr的npot图片的话，rgb888要比rgba8888所消耗的内存要小，但是pot图片两者又是一样的（png图片两种情况都是一样的）。可能是powervr显卡有特殊处理。
+>> 这里我测试还有一个诡异的地方，如果是用pvr的npot图片的话，rgb888要比rgba8888所消耗的内存要小，但是pot图片两者又是一样的（png图片两种情况都是一样的）。可能是powervr显卡有特殊处理。
 
 10. rgb565和rgb5551的图片所消耗的内存是rgba8888的一半，如果没有透明渐变的话，视觉上也看不出什么区别。一些大的背景图可以优先选择这种格式。
 
